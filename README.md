@@ -1,16 +1,14 @@
 # CryoSPARC particle overlay
 
-`cs_particle_overlay.py` places CryoSPARC 2D class averages back onto their source micrograph thumbnails. It is intended for visual inspection of particle distributions and molecular context, following the general idea of RELION `particle_reposition` and ReconSil.
+`cs_particle_overlay.py` places CryoSPARC 2D class averages back onto their source micrograph thumbnails for visual inspection of particle distributions and molecular context, following the same general approach as ReconSil (https://doi.org/10.1016/bs.mie.2022.03.016.) as executed in relion_particle_reposition`.
 
-The script is a visualisation tool. Its PNGs are not substitute experimental micrographs and should not be used for quantitative image processing.
-
-![Particle overlay demonstration](examples/overlay_demo.gif)
+![Particle overlay demonstration](examples/overlay_example.gif)
 
 ## What it does
 
 The script reads CryoSPARC `.cs` files from select-2D jobs and joins per-particle 2D class, pose, and shift information to source micrograph locations. It then:
 
-- matches thumbnails to source micrographs using the stable `FoilHole_...` acquisition identifier;
+- matches micrograph thumbnails to source micrographs using the stable `FoilHole_...` acquisition identifier;
 - tolerates leading UIDs and preprocessing suffixes such as dose-weighting and denoising;
 - accounts for different thumbnail dimensions and rescales templates accordingly;
 - applies CryoSPARC's positive in-plane pose and inverse shift convention;
@@ -30,15 +28,15 @@ Run the script from a directory containing the CryoSPARC job directories and the
 
 ## Recommended CryoSPARC workflow
 
-1. Import particles with their micrograph linkage preserved. The particle import job must retain the association between each particle and its source micrograph.
+1. If importing particles, preserve micrograph linkage.
 
-2. Iteratively perform 2D classification, separating predominant conformations or molecular species until the class averages are well defined.
+2. Iteratively perform 2D classifications (script works for multiple particle subsets) until class averages are well defined.
 
 3. Select useful 2D classes in one or more select-2D jobs, for example `J6317`, `J6318`, and `J6319`.
 
-4. If needed, use Particle Sets Tools to divide selected particles into biologically meaningful subsets, such as microtubule-bound and unbound particles.
+4. If needed, use Particle Sets Tools to divide selected particles into further subsets.
 
-5. Convert each particle-set output to STAR format. In the particle-set job directory, for example:
+5. Convert each particle-set output to STAR format, ensuring class number information is written to the output file. In the particle-set job directory, for example:
 
    ```bash
    module load PYEM
@@ -47,15 +45,15 @@ Run the script from a directory containing the CryoSPARC job directories and the
 
    The STAR file is used only as a pointer to a subset. All rendering metadata comes from the CryoSPARC `.cs` files in the select-2D job.
 
-6. Identify a manageable set of micrographs for visualisation. Curate exposures, or use a particle reassignment workflow if that helps select micrographs by particle count, defocus, or other criteria.
+6. Identify a manageable set of micrographs for visualisation. Curate exposures using selected particles as input (use particle reassignment first if particles from signal-subtracted micrographs are to be repositioned onto original micrographs).
 
-7. Optionally denoise the selected micrographs. For denoised thumbnails, ensure the thumbnail job receives the denoised micrograph input rather than the microtubule-subtracted or non-denoised input.
+7. Optionally denoise the selected micrographs. 
 
-8. Generate micrograph thumbnails. The script reads the `@1x` PNG paths recorded in the thumbnail job `.cs` file. Missing PNGs referenced by the manifest are skipped.
+8. Generate micrograph thumbnails at maximum resolution. For denoised thumbnails, ensure the generate thumbnails job receives only the micrograph_blob_denoised input and not micrograph_blob_non_dw. The script reads the `@1x` PNG paths recorded in the thumbnail job `.cs` file. Missing PNGs referenced by the manifest are skipped.
 
 ## Basic usage
 
-With no subset STAR files, all particles available from one select-2D job are overlaid:
+With no subset STAR files, all particles available from one select-2D job (J6319 below) are overlaid onto the thumbnails in the generate micrograph thumbnails job (J6442 below).
 
 ```bash
 python3 cs_particle_overlay.py J6319 \
@@ -63,7 +61,7 @@ python3 cs_particle_overlay.py J6319 \
   --out J6319/repositioned
 ```
 
-`--ori-dimension` defaults to `5760`, and no low-pass filtering is performed unless `--lowpassA` is supplied.
+`--ori-dimension` refers to the longest dimension of the original micrographs and defaults to `5760`.  No low-pass filtering is performed unless `--lowpassA` and --Apix (original micrograph pixel size) is supplied.
 
 ## One or more particle subsets
 
@@ -125,6 +123,8 @@ Blue        #0000FF
 LightBlue   #ADD8E6
 Green       #008000
 LightGreen  #90EE90
+DeepSkyBlue #00BFFF
+LimeGreen   #32CD32
 ```
 
 Display modes are:
@@ -133,7 +133,7 @@ Display modes are:
 - `border`: retain the grayscale template and draw a 4-pixel solid coloured border;
 - `border dashed`: retain the grayscale template and draw a 4-pixel dashed coloured border.
 
-Transparent subset outputs are not recoloured, regardless of the combined-overlay mode.
+Transparent subset outputs are not recoloured, regardless of the combined-overlay mode, to allow for manual downstream labelling and overlay.
 
 ## Filtering and scaling options
 
