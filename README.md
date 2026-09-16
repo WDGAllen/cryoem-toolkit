@@ -1,6 +1,6 @@
 # CryoSPARC particle overlay
 
-`cs_particle_overlay.py` places CryoSPARC 2D class averages back onto their source micrograph thumbnails for visual inspection of particle distributions and molecular context, following the same general approach as ReconSil (https://doi.org/10.1016/bs.mie.2022.03.016.) as executed in relion_particle_reposition`.
+`cs_particle_overlay.py` places CryoSPARC 2D class averages back onto their source micrograph thumbnails for visual inspection of particle distributions and molecular context, following the same general approach as ReconSil (https://doi.org/10.1016/bs.mie.2022.03.016) as executed in relion_particle_reposition.
 
 ![Particle overlay demonstration](examples/overlay_example.gif)
 
