@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.DS_Store
+
+# CryoSPARC jobs and large microscopy files
+J*/
+*.cs
+*.mrc
+*.mrcs
+*.star
+
+# Generated images
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.gif
+
+# Keep the demonstration GIF
+!examples/
+!examples/overlay_demo.gif
